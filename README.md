@@ -1,7 +1,3 @@
-Sure! Here's the revised and beautified README for your Chatbot GUI Application using LLAMA.cpp:
-
----
-
 # Chatbot GUI Application using LLAMA.cpp
 
 ## Description
@@ -68,7 +64,3 @@ FONT_STYLE_BOT = ("Arial", 12)  # Font style for bot messages
 ```bash
 python manager.py
 ```
-
----
-
-This README provides a clear and comprehensive guide for setting up and running the Chatbot GUI Application. It includes all necessary installation steps, configuration settings, and commands, ensuring a smooth setup process.

@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import scrolledtext
 import subprocess
 from config import Config
+from history import History
 
 class ChatbotGUI:
     def __init__(self):
@@ -34,6 +35,8 @@ class ChatbotGUI:
         # Clear conversation button
         self.clear_button = tk.Button(self.root, text="Clear Conversation", command=self.clear_conversation, font=(Config.FONT_FAMILY, Config.FONT_SIZE))
         self.clear_button.pack(padx=10, pady=5)
+
+        self.history = History(Config.N - (Config.N * 0.1))
         
     def run(self):
         self.root.mainloop()
@@ -41,10 +44,13 @@ class ChatbotGUI:
     def process_user_input(self, event):
         user_message = self.user_input_text.get("1.0", tk.END).strip()
         if user_message:
-            self.display_message("You: " + user_message, "user")
-            response = self.get_bot_response(user_message)
-            self.display_message("Bot: " + response, "bot")
-            self.user_input_text.delete("1.0", tk.END)
+            if self.history.add_chat("<|user|>", user_message):
+                self.display_message("You: " + user_message, "user")
+                response = self.get_bot_response(user_message)
+                self.display_message("Bot: " + response, "bot")
+                self.user_input_text.delete("1.0", tk.END)
+            else:
+                self.display_message("Error: Not enough space to add new chat", "bot")
         return "break"  # Prevent default behavior of newline insertion
     
     def display_message(self, message, sender):
@@ -58,13 +64,18 @@ class ChatbotGUI:
     
     def get_bot_response(self, message):
         system_prompt = self.system_prompt_text.get("1.0", tk.END).strip()
+
+        context = self.history.get_context()
+
         command = [
             Config.SCRIPT_PATH,
             "--model", Config.MODEL_PATH,
             "-r", "User:",
-            "--prompt", f"<|system|>\n{system_prompt}\n<|end|>\n<|user|>\n{message}\n<|end|>\n<|assistant|>\n",
+            "--prompt", f"<|system|>\n{system_prompt}\n<|end|>\n{context}\n<|assistant|>\n",
             "-ngl", str(Config.NGL),
+            "-b", str(Config.BATCH),
             "-n", str(Config.N),
+            "--temp", str(Config.TEMPERATURE),
             "-e",
             "-c", str(Config.C),
             "--repeat_penalty", str(Config.REPEAT_PENALTY)
@@ -75,6 +86,7 @@ class ChatbotGUI:
 
             # Get only the part between the last <|assistant|> and <|end|> tags
             response = result.split("<|assistant|>")[-1].split("<|end|>")[0].strip()
+            self.history.add_chat("<|assistant|>", response)
             return response
         except Exception as e:
             return f"Error: {e}"

@@ -95,6 +95,7 @@ class ChatbotGUI:
         self.chat_display.config(state='normal')
         self.chat_display.delete(1.0, tk.END)
         self.chat_display.config(state='disabled')
+        self.history = History(Config.N - (Config.N * 0.1))
 
 if __name__ == "__main__":
     app = ChatbotGUI()

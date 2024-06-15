@@ -1,7 +1,9 @@
 class Config:
     WINDOW_SIZE = "600x800" # Width x Height
     SCRIPT_PATH = "/home/cook/Documents/Dev/llama.cpp/main" # Path to the compiled Llama.cpp script
-    MODEL_PATH = "/home/cook/Documents/Dev/llama.cpp/models/Phi-3-mini-4k-instruct-q4.gguf" # Path to the model file
+    # MODEL_PATH = "/home/cook/Documents/Dev/llama.cpp/models/Phi-3-mini-4k-instruct-q4.gguf" # Path to the model file
+    MODEL_PATH = "/home/cook/Documents/Dev/llama.cpp/models/Llama-3-8B-Instruct-32k-v0.1.Q3_K_M.gguf" # Path to the model file
+    
     NGL = 32 # Number of layer to offload to the GPU
     BATCH = 128 # Batch size , default : 2048
     N = 300 # Number of tokens to generate, default : 128

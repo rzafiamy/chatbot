@@ -3,6 +3,7 @@ from tkinter import scrolledtext
 import subprocess
 from config import Config
 from history import History
+from chat_template import ChatTemplate
 
 class ChatbotGUI:
     def __init__(self):
@@ -37,6 +38,7 @@ class ChatbotGUI:
         self.clear_button.pack(padx=10, pady=5)
 
         self.history = History(Config.N - (Config.N * 0.1))
+        self.chat_template = ChatTemplate()
         
     def run(self):
         self.root.mainloop()
@@ -44,7 +46,7 @@ class ChatbotGUI:
     def process_user_input(self, event):
         user_message = self.user_input_text.get("1.0", tk.END).strip()
         if user_message:
-            if self.history.add_chat("<|user|>", user_message):
+            if self.history.add_chat("", user_message):
                 self.display_message("You: " + user_message, "user")
                 response = self.get_bot_response(user_message)
                 self.display_message("Bot: " + response, "bot")
@@ -67,11 +69,13 @@ class ChatbotGUI:
 
         context = self.history.get_context()
 
+        formatted_prompt = self.chat_template.format_prompt(system_prompt, message, context)
+
         command = [
             Config.SCRIPT_PATH,
             "--model", Config.MODEL_PATH,
             "-r", "User:",
-            "--prompt", f"<|system|>\n{system_prompt}\n<|end|>\n{context}\n<|assistant|>\n",
+            "--prompt", formatted_prompt,
             "-ngl", str(Config.NGL),
             "-b", str(Config.BATCH),
             "-n", str(Config.N),
@@ -82,11 +86,9 @@ class ChatbotGUI:
         ]
         try:
             result = subprocess.run(command, capture_output=True, text=True)
-            result =  result.stdout.strip()
-
-            # Get only the part between the last <|assistant|> and <|end|> tags
-            response = result.split("<|assistant|>")[-1].split("<|end|>")[0].strip()
-            self.history.add_chat("<|assistant|>", response)
+            raw_response = result.stdout.strip()
+            response = self.chat_template.format_response(raw_response)
+            self.history.add_chat("", response)
             return response
         except Exception as e:
             return f"Error: {e}"

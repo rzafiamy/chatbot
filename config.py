@@ -7,7 +7,7 @@ class Config:
     NGL = 32 # Number of layer to offload to the GPU
     BATCH = 128 # Batch size , default : 2048
     N = 300 # Number of tokens to generate, default : 128
-    C = 4000 # number of context tokens,  default : 512
+    C = 8000 # number of context tokens,  default : 512
     REPEAT_PENALTY = 1.5 # Repeat penalty for the model, default : 1.1
     TEMPERATURE = 0.6 # Temperature for the model, default : 0.8
 
